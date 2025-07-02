@@ -41,6 +41,11 @@ export default function Register({ admins }: RegisterProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+
+        if (!data.email.endsWith('@xceedcc.com') && !data.email.endsWith('@te.eg')) {
+            alert('Email must be a valid company address ending with @xceedcc.com or @te.eg.');
+            return;
+        }
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });

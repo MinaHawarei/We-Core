@@ -35,13 +35,21 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:' . User::class,
+                'regex:/^[\w.+\-]+@(xceedcc\.com|te\.eg)$/i',
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'department' => 'required|string|max:255',
             'site' => 'required|string|max:255',
             'manager_id' => 'nullable|integer|exists:users,id',
             'out_id' => 'required|string|max:10|unique:users,out_id',
         ]);
+
 
 
 
