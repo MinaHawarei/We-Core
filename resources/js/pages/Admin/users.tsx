@@ -30,6 +30,8 @@ export default function UsersDashboard() {
     manager_id: '',
     role: '',
     is_active: false,
+    password: '',
+    password_confirmation: '',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,6 +47,8 @@ export default function UsersDashboard() {
             manager_id: user.manager_id,
             role: user.role,
             is_active: user.is_active,
+            password: '',
+            password_confirmation: '',
         });
         setShowEditModal(true);
     };
@@ -52,6 +56,8 @@ export default function UsersDashboard() {
         setShowEditModal(false);
         setEditingUser(null);
     };
+    const cleanData = { ...formData };
+
     const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingUser) return;
@@ -59,9 +65,13 @@ export default function UsersDashboard() {
         setIsSubmitting(true);
 
         try {
+            if (!cleanData.password?.trim()) {
+                delete cleanData.password;
+                delete cleanData.password_confirmation;
+}
             await axios.put(`/admin/users/${editingUser.id}`, formData);
 
-            // حدث البيانات المحلية
+
             setLocalUsers((prev) =>
             prev.map((user) =>
                 user.id === editingUser.id ? { ...user, ...formData } : user
@@ -240,6 +250,25 @@ export default function UsersDashboard() {
                                 </option>
                             ))}
                         </select>
+                        <div className="flex space-x-4">
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                className="w-full px-4 py-2 border rounded"
+                                placeholder="New password (optional)"
+                            />
+
+                            <input
+                                type="password"
+                                name="password_confirmation"
+                                value={formData.password_confirmation}
+                                onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
+                                className="w-full px-4 py-2 border rounded"
+                                placeholder="Confirm password"
+                            />
+                        </div>
 
 
                         <div className="flex justify-end space-x-2">

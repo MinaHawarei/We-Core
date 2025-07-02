@@ -1,13 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Transition } from '@headlessui/react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, usePage } from '@inertiajs/react';
 
-import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -19,26 +13,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type ProfileForm = {
-    name: string;
-    email: string;
-};
-
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
-
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
-        name: auth.user.name,
-        email: auth.user.email,
-    });
-
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-
-        patch(route('profile.update'), {
-            preserveScroll: true,
-        });
-    };
+    const user = auth.user;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -46,81 +23,81 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name and email address" />
+                    <HeadingSmall title="Profile information" description="Your profile details" />
 
-                    <form onSubmit={submit} className="space-y-6">
-                        <div className="grid gap-2">
+                    <form className="space-y-6" onSubmit={e => e.preventDefault()}>
+                        {/* سطر 1: الاسم والايميل */}
+                        <div className="flex gap-6">
+                            <div className="flex-1 grid gap-2">
                             <Label htmlFor="name">Name</Label>
-
-                            <Input
+                            <p
                                 id="name"
-                                className="mt-1 block w-full"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                required
-                                autoComplete="name"
-                                placeholder="Full name"
-                            />
-
-                            <InputError className="mt-2" message={errors.name} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
-
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                autoComplete="username"
-                                placeholder="Email address"
-                            />
-
-                            <InputError className="mt-2" message={errors.email} />
-                        </div>
-
-                        {mustVerifyEmail && auth.user.email_verified_at === null && (
-                            <div>
-                                <p className="-mt-4 text-sm text-muted-foreground">
-                                    Your email address is unverified.{' '}
-                                    <Link
-                                        href={route('verification.send')}
-                                        method="post"
-                                        as="button"
-                                        className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                                    >
-                                        Click here to resend the verification email.
-                                    </Link>
-                                </p>
-
-                                {status === 'verification-link-sent' && (
-                                    <div className="mt-2 text-sm font-medium text-green-600">
-                                        A new verification link has been sent to your email address.
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
-
-                            <Transition
-                                show={recentlySuccessful}
-                                enter="transition ease-in-out"
-                                enterFrom="opacity-0"
-                                leave="transition ease-in-out"
-                                leaveTo="opacity-0"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
-                            </Transition>
-                        </div>
-                    </form>
-                </div>
+                                {user.name}
+                            </p>
+                            </div>
 
-                <DeleteUser />
+                            <div className="flex-1 grid gap-2">
+                            <Label htmlFor="email">Email address</Label>
+                            <p
+                                id="email"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            >
+                                {user.email}
+                            </p>
+                            </div>
+                        </div>
+
+                        {/* سطر 2: OUT ID و Department */}
+                        <div className="flex gap-6">
+                            <div className="flex-1 grid gap-2">
+                            <Label htmlFor="site">Site</Label>
+                            <p
+                                id="site"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            >
+                                {user.site}
+                            </p>
+                            </div>
+
+                            <div className="flex-1 grid gap-2">
+                            <Label htmlFor="department">Department</Label>
+                            <p
+                                id="department"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            >
+                                {user.department}
+                            </p>
+                            </div>
+                        </div>
+
+                        {/* سطر 3: Site و Manager */}
+                        <div className="flex gap-6">
+
+                             <div className="flex-1 grid gap-2">
+                            <Label htmlFor="out_id">OUT ID</Label>
+                            <p
+                                id="out_id"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            >
+                                {user.out_id}
+                            </p>
+                            </div>
+
+                            <div className="flex-1 grid gap-2">
+                            <Label htmlFor="manager">Manager</Label>
+                            <p
+                                id="manager"
+                                className="mt-1 block w-full px-3 py-2 border rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                            >
+                                {user.manager ? user.manager.name : '-'}
+                            </p>
+                            </div>
+                        </div>
+                        </form>
+
+                </div>
             </SettingsLayout>
         </AppLayout>
     );

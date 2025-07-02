@@ -17,7 +17,7 @@ class Admin
     {
         $user = $request->user();
 
-        if (!$user || !in_array($user->role, ['admin', 'leader'])) {
+        if (!$user || !in_array($user->role, ['admin', 'leader','manager','sv'])) {
             abort(403, 'Unauthorized');
         }
 

@@ -38,6 +38,13 @@ class UserController extends Controller
             if ($role) {
                 $data['role'] = $role;
             }
+
+            if ($request->filled('password')) {
+            $request->validate([
+                'password' => 'nullable|string|min:8|confirmed',
+            ]);
+            $data['password'] = bcrypt($request->input('password'));
+        }
         }
 
         $user->update($data);
