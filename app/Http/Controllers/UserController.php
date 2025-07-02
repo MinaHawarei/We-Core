@@ -12,9 +12,11 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('manager')->get();
+        $managers = User::where('role', '!=', 'Agent')->select('id', 'name')->get();
 
         return Inertia::render('Admin/users', [
             'users' => $users,
+            'managers' => $managers,
         ]);
     }
 

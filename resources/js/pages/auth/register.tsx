@@ -37,7 +37,7 @@ export default function Register({ admins }: RegisterProps) {
         out_id: '',
     });
     const departments = ['TECH', 'FTTH', 'Non Tech', 'TechLead'];
-    const sites = ['Alex', 'NCX', 'NC1', 'Qena'];
+    const sites = ['Alex', 'NCX', 'NC1', 'NC2', 'NC3', 'NC4', 'Qena'];
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();

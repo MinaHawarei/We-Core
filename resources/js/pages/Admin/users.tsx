@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function UsersDashboard() {
-    const { users } = usePage().props as unknown as { users: any[] };
+    const { users, managers } = usePage().props as unknown as { users: any[], managers: { id: number, name: string }[] };
     const [localUsers, setLocalUsers] = useState(users);   // 👈 نعمل نسخة محلية علشان نقدر نحذف منها
 
     const [showEditModal, setShowEditModal] = useState(false);
@@ -154,15 +154,22 @@ export default function UsersDashboard() {
                                 className="w-1/2 px-4 py-2 border rounded"
                                 placeholder="out_id"
                             />
-                            <input
-                                type="text"
+                            <select
                                 name="role"
                                 required
                                 value={formData.role}
                                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                className="w-1/2 px-4 py-2 border rounded"
-                                placeholder="Role"
-                            />
+                                className="w-1/2 px-4 py-2 border rounded bg-white dark:bg-gray-900"
+                                >
+                                <option value="" disabled>
+                                    Select Role
+                                </option>
+                                <option value="admin">Admin</option>
+                                <option value="manager">Manager</option>
+                                <option value="sv">SV</option>
+                                <option value="leader">Leader</option>
+                                <option value="agent">Agent</option>
+                            </select>
                         </div>
                         <input
                             type="text"
@@ -183,35 +190,57 @@ export default function UsersDashboard() {
                             placeholder="Email"
                         />
                         <div className="flex space-x-4">
-                            <input
-                                type="text"
-                                name="department"
-                                required
-                                value={formData.department}
-                                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                className="w-1/2 px-4 py-2 border rounded"
-                                placeholder="department"
-                            />
-                            <input
-                                type="text"
-                                name="site"
-                                required
-                                value={formData.site}
-                                onChange={(e) => setFormData({ ...formData, site: e.target.value })}
-                                className="w-1/2 px-4 py-2 border rounded"
-                                placeholder="site"
-                            />
+                            <select
+                            name="department"
+                            required
+                            value={formData.department}
+                            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                            className="w-1/2 px-4 py-2 border rounded bg-white dark:bg-gray-900"
+                            >
+                                <option value="" disabled>
+                                    Select Department
+                                </option>
+                                <option value="TECH">TECH</option>
+                                <option value="FTTH">FTTH</option>
+                                <option value="Non Tech">Non Tech</option>
+                                <option value="TechLead">TechLead</option>
+                            </select>
+
+                            <select
+                            name="site"
+                            required
+                            value={formData.site}
+                            onChange={(e) => setFormData({ ...formData, site: e.target.value })}
+                            className="w-1/2 px-4 py-2 border rounded bg-white dark:bg-gray-900"
+                            >
+                                <option value="" disabled>
+                                    Select Site
+                                </option>
+                                <option value="Alex">Alex</option>
+                                <option value="NCX">NCX</option>
+                                <option value="NC1">NC1</option>
+                                <option value="NC2">NC2</option>
+                                <option value="NC3">NC3</option>
+                                <option value="NC4">NC4</option>
+                                <option value="Qena">Qena</option>
+                            </select>
                         </div>
 
 
-                        <input
-                            type="text"
-                            name="manager_id"
-                            value={formData.manager_id}
-                            onChange={(e) => setFormData({ ...formData, manager_id: e.target.value })}
-                            className="w-full px-4 py-2 border rounded"
-                            placeholder="manager_id"
-                        />
+                       <select
+                        name="manager_id"
+                        value={formData.manager_id}
+                        onChange={(e) => setFormData({ ...formData, manager_id: e.target.value })}
+                        className="w-full px-4 py-2 border rounded bg-white dark:bg-gray-900"
+                        >
+                            <option value="">Select Manager</option>
+                            {managers.map((manager) => (
+                                <option key={manager.id} value={manager.id}>
+                                {manager.name}
+                                </option>
+                            ))}
+                        </select>
+
 
                         <div className="flex justify-end space-x-2">
                             <button
