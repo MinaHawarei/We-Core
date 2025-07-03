@@ -30,6 +30,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Dashboard
         Route::get('/reservation', [BookingController::class, 'admin'])->name('admin-reservation');
         Route::delete('/reservation/{id}', [BookingController::class, 'destroy'])->name('admin-reservation-destroy');
+        Route::put('/reservation/{id}/attendance', [BookingController::class, 'updateAttendance']);
 
         // Users
         Route::get('/users', [UserController::class, 'index'])->name('admin-users');

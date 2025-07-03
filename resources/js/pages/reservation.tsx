@@ -30,9 +30,13 @@ export default function Dashboard() {
     const [formData, setFormData] = useState({
         notes: '',
         bookingTime: '',
+        bookingTimeTo: '',
+        visitReason: '',
+        numberOfVisitors: 1,
     });
 
-    const { fullyBookedDates = [] } = usePage<PageProps>().props;
+    const { fullyBookedDates = [], auth } = usePage<PageProps & { auth: { user: { role: string } } }>().props;
+    const userRole = auth?.user?.role;
     const disabledDates = fullyBookedDates.map((date) =>
         new Date(date).toDateString()
     );
@@ -69,6 +73,9 @@ export default function Dashboard() {
                 date: selectedDate.toLocaleDateString('en-CA'),
                 notes: formData.notes,
                 booking_time: formData.bookingTime,
+                booking_time_to: formData.bookingTimeTo,
+                numberOfVisitors: formData.numberOfVisitors,
+                Reason: formData.visitReason,
             });
             toast.success(`Booking confirmed for ${selectedDate.toDateString()}!`);
             setShowModal(false);
@@ -126,15 +133,99 @@ export default function Dashboard() {
                                             })}
                                     </h2>
                                     <form onSubmit={handleSubmit} className="space-y-4">
-
-                                        <input
+                                        
+                                        <div className="flex flex-wrap gap-4">
+                                        {/* From */}
+                                        <div className="w-[48%]">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            From
+                                            </label>
+                                            <input
                                             type="time"
                                             name="booking_time"
                                             required
                                             value={formData.bookingTime}
-                                            onChange={(e) => setFormData({ ...formData, bookingTime: e.target.value })}
-                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                        />
+                                            onChange={(e) => {
+                                                const fromTime = e.target.value;
+                                                const [hours, minutes] = fromTime.split(":").map(Number);
+                                                const toDate = new Date();
+                                                toDate.setHours(hours);
+                                                toDate.setMinutes(minutes + 30);
+                                                const toTime = toDate.toTimeString().split(":").slice(0, 2).join(":");
+
+                                                setFormData((prevData) => ({
+                                                ...prevData,
+                                                bookingTime: fromTime,
+                                                bookingTimeTo: toTime,
+                                                }));
+                                            }}
+                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded"
+                                            />
+                                        </div>
+
+                                        {/* To */}
+                                        <div className="w-[48%]">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            To
+                                            </label>
+                                            <input
+                                            type="time"
+                                            name="booking_time_to"
+                                            value={formData.bookingTimeTo}
+                                            onChange={(e) => {
+                                                if (userRole !== 'agent') {
+                                                setFormData({ ...formData, bookingTimeTo: e.target.value });
+                                                }
+                                            }}
+                                            readOnly={userRole === 'agent'}
+                                            disabled={userRole === 'agent'}
+                                            className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 ${
+                                                userRole === 'agent' ? 'bg-gray-100 cursor-not-allowed opacity-70' : 'bg-white dark:bg-[#2a2a2a]'
+                                            } text-black dark:text-white rounded`}
+                                            />
+                                        </div>
+
+                                        {/* Reason */}
+                                        <div className="w-[48%]">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Reason
+                                            </label>
+                                            <select
+                                            required
+                                            value={formData.visitReason}
+                                            onChange={(e) => setFormData({ ...formData, visitReason: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded"
+                                            >
+                                            <option value="">Select a reason</option>
+                                            <option value="System">System</option>
+                                            <option value="Device">Device</option>
+                                            <option value="CPE">CPE</option>
+                                            <option value="training">Training</option>
+                                            <option value="other">Other</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Number of Visitors */}
+                                        <div className="w-[48%]">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Number of Visitors
+                                            </label>
+                                            <input
+                                            type="number"
+                                            min={1}
+                                            max={20}
+                                            value={formData.numberOfVisitors}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, numberOfVisitors: parseInt(e.target.value) })
+                                            }
+                                            required
+                                            disabled={userRole === 'agent'}
+                                            className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded ${
+                                                userRole === 'agent' ? 'cursor-not-allowed opacity-60' : ''
+                                            }`}
+                                            />
+                                        </div>
+                                        </div>
                                         <textarea
                                             placeholder="Additional Notes"
                                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
