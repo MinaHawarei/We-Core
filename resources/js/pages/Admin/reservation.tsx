@@ -56,9 +56,10 @@ export default function ReservationDashboard() {
       return;
     }
     try {
-      await axios.put(`/admin/reservation/${id}/attendance`, {
-        attendance: current === 1 ? 0 : 1,
-      });
+       await axios.post(`/admin/reservation/${id}/attendance`, {
+                attendance: current === 1 ? 0 : 1,
+            _method: 'PUT'
+        });
       fetchReservations();
       toast.success('Attendance updated');
     } catch {
@@ -191,21 +192,21 @@ export default function ReservationDashboard() {
                     <td className="p-2 border text-center">{res.reason || '-'}</td>
                     <td className="p-2 border text-center">{res.number_of_visitors || 1}</td>
                     <td className="p-2 border text-center">
-  {new Date(res.date) <= new Date() ? (
-    <label className="inline-flex items-center cursor-pointer relative">
-      <input
-        type="checkbox"
-        className="sr-only peer"
-        checked={res.attendance === 1}
-        onChange={() => handleAttendanceToggle(res.id, res.attendance, res.date)}
-      />
-      <div className="w-11 h-6 bg-gray-400 rounded-full peer-checked:bg-green-500 transition-colors duration-300"></div>
-      <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-full"></div>
-    </label>
-  ) : (
-    <span className="text-xs text-gray-400">Not available</span>
-  )}
-</td>
+                    {new Date(res.date) <= new Date() ? (
+                        <label className="inline-flex items-center cursor-pointer relative">
+                        <input
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={res.attendance === 1}
+                            onChange={() => handleAttendanceToggle(res.id, res.attendance, res.date)}
+                        />
+                        <div className="w-11 h-6 bg-gray-400 rounded-full peer-checked:bg-green-500 transition-colors duration-300"></div>
+                        <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 peer-checked:translate-x-full"></div>
+                        </label>
+                    ) : (
+                        <span className="text-xs text-gray-400">Not available</span>
+                    )}
+                    </td>
 
                     <td className="p-2 border text-center">{res.notes || '-'}</td>
                     <td className="p-2 border text-center">
@@ -213,8 +214,10 @@ export default function ReservationDashboard() {
                         onClick={() => {
                           if (confirm('Are you sure you want to cancel this reservation?')) {
                             axios
-                              .delete(`/admin/reservation/${res.id}`)
-                              .then(() => {
+                                .post(`/admin/reservation/${res.id}`, {
+                                    _method: 'DELETE',
+                                })
+                                .then(() => {
                                 toast.success('Reservation cancelled');
                                 fetchReservations();
                               })

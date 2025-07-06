@@ -31,8 +31,8 @@ export default function Dashboard() {
         notes: '',
         bookingTime: '',
         bookingTimeTo: '',
-        visitReason: '',
-        numberOfVisitors: 1,
+        visit_reason: '',
+        number_of_visitors: 1,
     });
 
     const { fullyBookedDates = [], auth } = usePage<PageProps & { auth: { user: { role: string } } }>().props;
@@ -74,8 +74,8 @@ export default function Dashboard() {
                 notes: formData.notes,
                 booking_time: formData.bookingTime,
                 booking_time_to: formData.bookingTimeTo,
-                numberOfVisitors: formData.numberOfVisitors,
-                Reason: formData.visitReason,
+                number_of_visitors: formData.number_of_visitors,
+                visit_reason: formData.visit_reason,
             });
             toast.success(`Booking confirmed for ${selectedDate.toDateString()}!`);
             setShowModal(false);
@@ -133,7 +133,7 @@ export default function Dashboard() {
                                             })}
                                     </h2>
                                     <form onSubmit={handleSubmit} className="space-y-4">
-                                        
+
                                         <div className="flex flex-wrap gap-4">
                                         {/* From */}
                                         <div className="w-[48%]">
@@ -192,8 +192,8 @@ export default function Dashboard() {
                                             </label>
                                             <select
                                             required
-                                            value={formData.visitReason}
-                                            onChange={(e) => setFormData({ ...formData, visitReason: e.target.value })}
+                                            value={formData.visit_reason}
+                                            onChange={(e) => setFormData({ ...formData, visit_reason: e.target.value })}
                                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#2a2a2a] text-black dark:text-white rounded"
                                             >
                                             <option value="">Select a reason</option>
@@ -214,9 +214,9 @@ export default function Dashboard() {
                                             type="number"
                                             min={1}
                                             max={20}
-                                            value={formData.numberOfVisitors}
+                                            value={formData.number_of_visitors}
                                             onChange={(e) =>
-                                                setFormData({ ...formData, numberOfVisitors: parseInt(e.target.value) })
+                                                setFormData({ ...formData, number_of_visitors: parseInt(e.target.value) })
                                             }
                                             required
                                             disabled={userRole === 'agent'}

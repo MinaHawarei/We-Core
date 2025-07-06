@@ -68,9 +68,12 @@ export default function UsersDashboard() {
             if (!cleanData.password?.trim()) {
                 delete cleanData.password;
                 delete cleanData.password_confirmation;
-}
-            await axios.put(`/admin/users/${editingUser.id}`, formData);
+                }
 
+            await axios.post(`/admin/users/${editingUser.id}`, {
+            ...formData,
+            _method: 'PUT'
+            });
 
             setLocalUsers((prev) =>
             prev.map((user) =>
@@ -93,7 +96,10 @@ export default function UsersDashboard() {
     if (!confirm('Are you sure you want to delete this user?')) return;
 
         try {
-            const response = await axios.delete(`/admin/users/${id}`);
+            const response = await axios.post(`/admin/users/${id}`, {
+            _method: 'DELETE',
+            });
+
 
             // تحقق من حالة الرد
             if (response.status === 200 || response.status === 204) {
@@ -112,8 +118,9 @@ export default function UsersDashboard() {
 
   const toggleUserStatus = async (id: number, currentStatus: boolean) => {
     try {
-        await axios.put(`/admin/users/${id}`, {
+        await axios.post(`/admin/users/${id}`, {
             is_active: !currentStatus,
+            _method: 'PUT'
         });
 
         setLocalUsers((prevUsers) =>

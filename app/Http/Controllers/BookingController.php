@@ -59,6 +59,7 @@ class BookingController extends Controller
             $validated = $request->validate([
                 'date' => 'required|date',
                 'booking_time' => 'required|date_format:H:i',
+                'booking_time_to' => 'required|date_format:H:i',
                 'notes' => 'nullable|string|max:1000',
                 'visit_reason' => 'required|string|max:255',
             ]);
@@ -85,7 +86,7 @@ class BookingController extends Controller
             'time' => $validated['booking_time'],
             'time_to' => $validated['booking_time_to'],
             'notes' => $validated['notes'] ?? null,
-            'visit_reason' => $validated['visit_reason'],
+            'reason' => $validated['visit_reason'],
             'number_of_visitors' => $validated['number_of_visitors'],
         ]);
 

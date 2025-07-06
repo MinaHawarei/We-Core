@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/reservation', [BookingController::class, 'index'])->name('reservation');
     Route::post('/bookings', [BookingController::class, 'store']);
+
+    Route::get('/posts', [PostController::class, 'index'])->name('posts');
+    Route::post('/posts', [PostController::class, 'store']);
 
 
 });

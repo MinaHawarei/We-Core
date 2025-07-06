@@ -10,6 +10,9 @@ class Booking extends Model
        'user_id',
         'date',
         'time',
+        'time_to',
+        'reason',
+        'number_of_visitors',
         'notes',
     ];
     public function user()
