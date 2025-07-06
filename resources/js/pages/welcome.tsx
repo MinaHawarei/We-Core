@@ -38,7 +38,7 @@ export default function Welcome() {
                             dark:bg-[#1d1d1d]
                             dark:text-[#EDEDEC]
                             dark:shadow-[inset_0px_0px_0px_1px_#fffaed1a]">
-                                    <h1 className="mb-1 font-medium">Welcome to Technical Lab Reservation</h1>
+                                    <h1 className="mb-1 font-medium">Welcome to Internet Technical Lab</h1>
                             <p className="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
                                 Reserve, manage, and monitor technical lab resources with ease.
                                 <br />
@@ -54,7 +54,7 @@ export default function Welcome() {
                                     <span>
                                         Step-by-Step Guide
                                         <a
-                                            href="https://laravel.com/docs"
+                                            href="#"
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
@@ -85,7 +85,7 @@ export default function Welcome() {
                                     <span>
                                         Discover LAB Resources
                                         <a
-                                            href="https://laracasts.com"
+                                            href="#"
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
