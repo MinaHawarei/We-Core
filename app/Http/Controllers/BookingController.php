@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon ;
+use App\Models\User;
 
 
 class BookingController extends Controller
@@ -14,20 +15,41 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         $bookings = DB::table('bookings')
-            ->select(DB::raw('DATE(date) as booking_date'), DB::raw('count(*) as count'))
+            ->selectRaw('DATE(date) as booking_date, SUM(number_of_visitors) as total_visitors')
             ->groupBy('booking_date')
             ->get();
 
         $fullyBookedDates = $bookings
-            ->filter(fn($item) => $item->count >= 10)
+            ->filter(fn($item) => $item->total_visitors >= 10)
             ->pluck('booking_date')
             ->map(fn($date) => Carbon::parse($date)->toDateString())
             ->values();
+        $today = Carbon::today();
+        $disabledDates = [];
+        for ($i = -365; $i <= 0; $i++) {
+            //$disabledDates[] = $today->copy()->addDays($i)->toDateString();
+        }
 
+        $blockedRaw = DB::table('blocked_slots')->get();
+        $blockedSlots = [];
+
+        foreach ($blockedRaw as $slot) {
+            $date = Carbon::parse($slot->date)->toDateString();
+            $from = Carbon::parse($slot->from);
+            $to = Carbon::parse($slot->to);
+
+            while ($from < $to) {
+                $blockedSlots[$date][] = $from->format('H:i');
+                $from->addMinutes(15);
+            }
+        }
         return Inertia::render('reservation', [
             'fullyBookedDates' => $fullyBookedDates,
+            'disabledDates' => $disabledDates,
+            'blockedSlots' => $blockedSlots,
         ]);
     }
+
     public function store(Request $request)
     {
         $user = $request->user();
@@ -54,7 +76,6 @@ class BookingController extends Controller
             return response()->json(['message' => 'You already booked this slot.'], 422);
         }
 
-        // ✅ التحقق حسب الدور
         if ($user->role === 'agent') {
             $validated = $request->validate([
                 'date' => 'required|date',
@@ -66,9 +87,21 @@ class BookingController extends Controller
 
             // احسب وقت النهاية (30 دقيقة بعد البداية)
             $from = Carbon::createFromFormat('H:i', $validated['booking_time']);
-            $to = $from->copy()->addMinutes(30);
+            $to = $from->copy()->addMinutes(15);
             $validated['booking_time_to'] = $to->format('H:i');
             $validated['number_of_visitors'] = 1;
+
+            Booking::create([
+                'user_id' => $user->id,
+                'date' => $validated['date'],
+                'time' => $validated['booking_time'],
+                'time_to' => $validated['booking_time_to'],
+                'notes' => $validated['notes'] ?? null,
+                'reason' => $validated['visit_reason'],
+                'number_of_visitors' => $validated['number_of_visitors'],
+            ]);
+
+
         } else {
             $validated = $request->validate([
                 'date' => 'required|date',
@@ -77,18 +110,57 @@ class BookingController extends Controller
                 'notes' => 'nullable|string|max:1000',
                 'visit_reason' => 'required|string|max:255',
                 'number_of_visitors' => 'required|integer|min:1|max:20',
+                'visitor_ids' => 'nullable|array',
+                'visitor_ids.*' => 'nullable|string|max:255',
             ]);
-        }
 
-        Booking::create([
-            'user_id' => $user->id,
-            'date' => $validated['date'],
-            'time' => $validated['booking_time'],
-            'time_to' => $validated['booking_time_to'],
-            'notes' => $validated['notes'] ?? null,
-            'reason' => $validated['visit_reason'],
-            'number_of_visitors' => $validated['number_of_visitors'],
-        ]);
+
+            $visitorIds = $validated['visitor_ids'] ?? [];
+
+
+            foreach ($visitorIds as $outId) {
+                $targetUser = User::where('out_id', $outId)->first();
+                if (!$targetUser){
+                    return response()->json(['message' => 'the user '. $outId .' is not found'], 422);
+                }
+                if ($user->role !== 'admin' && $targetUser->manager_id !== $user->id) {
+                    return response()->json([
+                        'message' => 'You are not authorized to book for user ' . $outId . '.'
+                    ], 403);
+                }
+             }
+
+            $validated['notes'] =  implode(' , ', $validated['visitor_ids'] ?? []);
+            Booking::create([
+                'user_id' => $user->id,
+                'date' => $validated['date'],
+                'time' => $validated['booking_time'],
+                'time_to' => $validated['booking_time_to'],
+                'notes' => $validated['notes'] ?? null,
+                'reason' => $validated['visit_reason'],
+                'number_of_visitors' => 0,
+            ]);
+
+
+            foreach ($visitorIds as $outId) {
+                if (!$outId) continue;
+
+                $targetUser = User::where('out_id', $outId)->first();
+                if (!$targetUser) continue; // لو مش لاقي المستخدم نتخطاه
+
+                Booking::create([
+                    'user_id' => $targetUser->id,
+                    'date' => $validated['date'],
+                    'time' => $validated['booking_time'],
+                    'time_to' => $validated['booking_time_to'],
+                    'notes' => 'reserved by ' . $user->name,
+                    'reason' => $validated['visit_reason'],
+                    'number_of_visitors' => 1,
+                    // 'created_by' => $user->id, // لو عندك عمود لتتبع من قام بالحجز
+                ]);
+            }
+
+        }
 
         return response()->json(['message' => 'Booking created successfully!']);
     }
@@ -101,21 +173,18 @@ class BookingController extends Controller
         return response()->json(['message' => 'Booking cancelled successfully']);
     }
 
-    public function admin(Request $request)
+   public function admin(Request $request)
     {
-        $fromDate = $request->input('from_date');
-        $toDate = $request->input('to_date');
+        $fromDate = $this->normalizeDate($request->input('from'));
+        $toDate = $this->normalizeDate($request->input('to'));
         $outId = $request->input('out_id');
         $role = $request->input('role');
         $reason = $request->input('reason');
         $attendance = $request->input('attendance');
         $sortBy = $request->input('sort_by', 'date');
         $sortDirection = $request->input('sort_direction', 'asc');
+        $status = $request->input('status');
 
-        $fromDate = $this->normalizeDate($request->input('from'));
-        $toDate = $this->normalizeDate($request->input('to'));
-
-        // ✅ نبدأ البناء الاستعلام
         $query = Booking::with('user');
 
         if ($fromDate) {
@@ -142,6 +211,19 @@ class BookingController extends Controller
             $query->where('attendance', $attendance);
         }
 
+        // ✅ فلترة الحالة
+        if ($request->wantsJson()) {
+            if (!$request->has('status')) {
+                $query->where('status', 1); // الحالة الافتراضية = Approved
+            } else {
+                if ($status === 'null') {
+                    $query->whereNull('status');
+                } elseif (is_numeric($status)) {
+                    $query->where('status', (int)$status);
+                }
+            }
+        }
+
         // ✅ الترتيب الديناميكي
         $allowedSorts = ['date', 'time', 'booking_time_to', 'number_of_visitors', 'attendance', 'visit_reason'];
         if (in_array($sortBy, $allowedSorts)) {
@@ -151,10 +233,14 @@ class BookingController extends Controller
         }
 
         $reservations = $query->get();
+        $pendingCount = Booking::whereNull('status')->count();
 
         // ✅ لو الطلب من React يرجع JSON
         if ($request->wantsJson()) {
-            return response()->json($reservations);
+            return response()->json([
+                'data' => $reservations,
+                'pending_count' => $pendingCount,
+            ]);
         }
 
         // ✅ وإلا نرجعه لـ Inertia
@@ -162,6 +248,7 @@ class BookingController extends Controller
             'reservations' => $reservations,
         ]);
     }
+
 
     public function updateAttendance(Request $request, $id)
     {
@@ -188,6 +275,18 @@ class BookingController extends Controller
         }
 
         return null;
+    }
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'nullable|in:0,1', // null = pending, 1 = approved, 0 = rejected
+        ]);
+
+        $booking = Booking::findOrFail($id);
+        $booking->status = $request->input('status');
+        $booking->save();
+
+        return response()->json(['message' => 'Status updated successfully']);
     }
 
 }

@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid , CalendarDays, User } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid , CalendarDays, User , History } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -14,9 +14,19 @@ const mainNavItems: NavItem[] = [
         icon: CalendarDays,
     },
     {
+        title: 'TechLAB Schedule',
+        href: '/admin/schedule/',
+        icon: CalendarDays,
+    },
+    {
         title: 'Users',
         href: '/admin/users',
         icon: User,
+    },
+    {
+        title: 'Activity Logs',
+        href: '/admin/activity-logs',
+        icon: History,
     },
 
 ];

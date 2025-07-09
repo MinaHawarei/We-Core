@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\ActivityLog;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,7 @@ class User extends Authenticatable
         'role',
     ];
 
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -42,6 +44,39 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'manager_id');
     }
+
+    protected static function booted()
+    {
+        static::created(function ($model) {
+            self::logActivity($model, 'created', null, $model->toArray());
+        });
+
+        static::updated(function ($model) {
+            $changes = $model->getChanges();
+
+            if (!empty($changes)) {
+                self::logActivity($model, 'updated', $model->getOriginal(), $changes);
+            }
+        });
+
+        static::deleted(function ($model) {
+            self::logActivity($model, 'deleted', $model->toArray(), null);
+        });
+    }
+
+    protected static function logActivity($model, $action, $oldData, $newData)
+    {
+        ActivityLog::create([
+            'user_id' => optional(auth()->user())->id,
+            'model_type' => get_class($model),
+            'model_id'   => $model->getKey(),
+            'action'     => $action,
+            'old_data'   => $oldData ? json_encode($oldData) : null,
+            'new_data'   => $newData ? json_encode($newData) : null,
+            'created_at' => now(),
+        ]);
+    }
+
 
     /**
      * Get the attributes that should be cast.

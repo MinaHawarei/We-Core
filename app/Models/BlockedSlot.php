@@ -4,23 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Booking extends Model
+class BlockedSlot extends Model
 {
-    protected $fillable = [
-       'user_id',
-        'date',
-        'time',
-        'time_to',
-        'reason',
-        'number_of_visitors',
-        'notes',
-        'status',
-    ];
-    public function user()
-    {
-    return $this->belongsTo(User::class);
-    }
-
+    protected $fillable = ['date', 'from', 'to', 'reason'];
     protected static function booted()
     {
         static::created(function ($model) {
