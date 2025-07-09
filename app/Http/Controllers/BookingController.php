@@ -8,6 +8,9 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon ;
 use App\Models\User;
+use App\Mail\BookingSubmitted;
+use App\Mail\BookingStatusChanged;
+use Illuminate\Support\Facades\Mail;
 
 
 class BookingController extends Controller
@@ -100,6 +103,8 @@ class BookingController extends Controller
                 'reason' => $validated['visit_reason'],
                 'number_of_visitors' => $validated['number_of_visitors'],
             ]);
+            Mail::to($user->email)->send(new BookingSubmitted($user, $validated));
+
 
 
         } else {
@@ -140,6 +145,8 @@ class BookingController extends Controller
                 'reason' => $validated['visit_reason'],
                 'number_of_visitors' => 0,
             ]);
+            Mail::to($user->email)->send(new BookingSubmitted($user, $validated));
+
 
 
             foreach ($visitorIds as $outId) {
@@ -158,6 +165,8 @@ class BookingController extends Controller
                     'number_of_visitors' => 1,
                     // 'created_by' => $user->id, // لو عندك عمود لتتبع من قام بالحجز
                 ]);
+                Mail::to($user->email)->send(new BookingSubmitted($targetUser, $validated));
+
             }
 
         }
@@ -285,6 +294,17 @@ class BookingController extends Controller
         $booking = Booking::findOrFail($id);
         $booking->status = $request->input('status');
         $booking->save();
+        if($booking->status == 1){
+            // إذا كان الحجز مقبول
+            $status = "accepted";
+        } elseif ($booking->status == 0) {
+            // إذا كان الحجز مرفوض
+            $status = "rejected";
+        } else {
+            // الحالة الافتراضية (معلقة)
+            $status = "pending";
+        }
+        Mail::to($booking->user->email)->send(new BookingStatusChanged($booking->user, $booking, $status));
 
         return response()->json(['message' => 'Status updated successfully']);
     }
