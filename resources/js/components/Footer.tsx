@@ -6,7 +6,7 @@ export default function Footer() {
                  dark:bg-gray-800 dark:text-gray-300"
       style={{ flexShrink: 0 }}
     >
-      <div>Developed by : Mina Hawarei © {new Date().getFullYear()} - TechLead Team</div>
+      <div>Created By : Mina Hawarei © {new Date().getFullYear()} - TechLead Team</div>
     </footer>
   );
 }

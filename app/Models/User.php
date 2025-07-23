@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\ActivityLog;
+use App\Models\PushSubscription;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable ;
 
     /**
      * The attributes that are mass assignable.
@@ -66,6 +67,9 @@ class User extends Authenticatable
 
     protected static function logActivity($model, $action, $oldData, $newData)
     {
+        if (!auth()->check()) {
+            return;
+        }
         ActivityLog::create([
             'user_id' => optional(auth()->user())->id,
             'model_type' => get_class($model),
