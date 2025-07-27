@@ -7,6 +7,13 @@ import { initializeTheme } from './hooks/use-appearance';
 import { useEffect } from 'react';
 
 import axios from 'axios';
+import { configureEcho } from '@laravel/echo-react';
+
+configureEcho({
+    broadcaster: 'reverb',
+});
+
+
 
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -27,7 +34,8 @@ createInertiaApp({
     } else {
       console.error('CSRF token not found');
     }
-
+    const userIdTag = document.querySelector('meta[name="user-id"]');
+    window.appUserId = userIdTag?.getAttribute('content') ?? undefined;
     const root = createRoot(el);
     root.render(<App {...props} />);
   },

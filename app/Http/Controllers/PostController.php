@@ -55,6 +55,9 @@ class PostController extends Controller
             'post_type' => $validated['post_type'],
         ]);
 
+        event(new \App\Events\NewPostNotification("تم إضافة بوست جديد"));
+
+
         return response()->json([
             'message' => 'Post created successfully.',
             'post' => $post->load('user:id,name'),

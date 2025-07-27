@@ -7,10 +7,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AdminScheduleController;
+use App\Http\Controllers\vocController;
+use App\Exports\VocExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+Route::post('/voc', [vocController::class, 'store']);
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -22,6 +28,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/posts', [PostController::class, 'index'])->name('posts');
     Route::post('/posts', [PostController::class, 'store']);
 
+
+    Route::get('/voc-logs', [vocController::class, 'index'])->name('voc-logs');
+    Route::post('/voc-toggle', [vocController::class, 'toggleAutoSave']);
+    Route::post('/voc-clear-all', [vocController::class, 'destroyAll']);
+
+    Route::get('/voc-export', function () {return Excel::download(new VocExport, 'voc_logs.xlsx');
+});
 
 
 });

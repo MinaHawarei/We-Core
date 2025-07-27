@@ -7,30 +7,36 @@ import { Link , usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid , CalendarDays , Bell } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'TechLAB Reservation',
-        href: '/reservation',
-        icon: CalendarDays,
-    },
-    {
-        title: 'News Feed',
-        href: '/posts',
-        icon: Bell,
-    },
 
-
-];
 
 
 
 export function AppSidebar() {
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'TechLAB Reservation',
+            href: '/reservation',
+            icon: CalendarDays,
+        },
+        {
+            title: 'News Feed',
+            href: '/posts',
+            icon: Bell,
+        },
+
+
+    ];
     const { props } = usePage();
     const user = props.auth?.user;
 
-    // ✅ Footer items (conditionally includes dashboard for admin)
     const footerNavItems: NavItem[] = [];
-
+    if (user?.role === 'admin') {
+        mainNavItems.push({
+        title: 'VOC',
+        href: '/voc-logs',
+        icon: LayoutGrid,
+        });
+    }
     if (user?.role === 'admin') {
         footerNavItems.push({
         title: 'Dashboard',
@@ -38,6 +44,7 @@ export function AppSidebar() {
         icon: LayoutGrid,
         });
     }
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

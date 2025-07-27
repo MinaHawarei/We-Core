@@ -31,6 +31,7 @@ export default function Dashboard() {
     bookingTime: '',
     bookingTimeTo: '',
     visit_reason: '',
+    agreeToPolicy: false,
     number_of_visitors: 1,
   });
 
@@ -73,6 +74,7 @@ export default function Dashboard() {
         number_of_visitors: formData.number_of_visitors,
         visit_reason: formData.visit_reason,
         visitor_ids: visitorIds,
+        agreeToPolicy: formData.agreeToPolicy,
       });
       toast.success(`Booking request submitted for ${selectedDate.toDateString()} , pending approval.`);
       setShowModal(false);
@@ -213,7 +215,19 @@ export default function Dashboard() {
                   )}
 
                   <textarea placeholder="Additional Notes" className="w-full px-4 py-2 border rounded" rows={3} value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}></textarea>
-
+                  <div className="flex items-start space-x-2">
+                    <input
+                        type="checkbox"
+                        id="policy"
+                        checked={formData.agreeToPolicy || false}
+                        onChange={(e) => setFormData({ ...formData, agreeToPolicy: e.target.checked })}
+                        className="mt-1"
+                        required
+                    />
+                    <label htmlFor="policy" className="text-sm">
+                        Confirm that you are responsible To Update mention Schedule time on your Teleopti - IF Needed
+                    </label>
+                    </div>
                   <div className="flex justify-end space-x-2">
                     <button type="button" onClick={handleClose} disabled={isSubmitting} className="px-4 py-2 border rounded text-gray-700">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-purple-600 text-white rounded min-w-24">
