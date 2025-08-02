@@ -11,7 +11,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewPostNotification implements ShouldBroadcastNow
+class NewPostNotification
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 

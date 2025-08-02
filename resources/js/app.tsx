@@ -7,11 +7,6 @@ import { initializeTheme } from './hooks/use-appearance';
 import { useEffect } from 'react';
 
 import axios from 'axios';
-import { configureEcho } from '@laravel/echo-react';
-
-configureEcho({
-    broadcaster: 'reverb',
-});
 
 
 

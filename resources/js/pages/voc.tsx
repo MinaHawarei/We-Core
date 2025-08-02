@@ -46,9 +46,11 @@ export default function Dashboard() {
     const { props } = usePage() as any;
     const vocs = props.vocs?.data || []
 
-    const [autoSave, setAutoSave] = useState(true); // Toggle for auto-save
+    const autoSaveFromServer = props.autoSaveEnabled; // <-- جاي من Laravel
+    const [autoSave, setAutoSave] = useState(autoSaveFromServer); // Toggle for auto-save
     const [isClearing, setIsClearing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+
 
     const handleToggleAutoSave = async () => {
         try {
@@ -169,7 +171,8 @@ export default function Dashboard() {
                                     <td className="px-4 py-2">{voc.type || '-'}</td>
                                     <td className="px-4 py-2">{voc.bras || '-'}</td>
                                     <td className="px-4 py-2">{voc.area || '-'}</td>
-                                    <td className="px-4 py-2">{new Date(voc.created_at).toLocaleDateString()}</td>
+                                    <td className="px-4 py-2">{new Date(voc.created_at).toLocaleString()}</td>
+
                                 </tr>
                             ))}
                             {vocs.length === 0 && (

@@ -32,8 +32,10 @@ class vocController extends Controller
     public function index()
     {
         $logs = voc::latest()->paginate(50);
+        $autoSave = Setting::get('voc_autosave', '1') === '1';
         return Inertia::render('voc', [
-            'logs' => $logs
+            'vocs' => $logs ,
+            'autoSaveEnabled' => $autoSave,
         ]);
 
     }
